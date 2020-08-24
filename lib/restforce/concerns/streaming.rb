@@ -36,10 +36,10 @@ module Restforce
         end
 
         url = "#{options[:instance_url]}/cometd/#{options[:api_version]}"
-
+        Restforce.log "[URL]#{url}"
         @faye ||= Faye::Client.new(url).tap do |client|
           client.set_header 'Authorization', "OAuth #{options[:oauth_token]}"
-
+          Restforce.log "[TOKEN]#{options[:oauth_token]}"
           client.bind 'transport:down' do
             Restforce.log "[COMETD DOWN]"
             client.set_header 'Authorization', "OAuth #{authenticate!.access_token}"
@@ -63,6 +63,8 @@ module Restforce
         end
 
         def incoming(message, callback)
+          Restforce.log "[MESSAGE]"
+          Restforce.log message
           callback.call(message).tap do
             channel = message.fetch('channel')
             replay_id = message.fetch('data', {}).fetch('event', {})['replayId']
